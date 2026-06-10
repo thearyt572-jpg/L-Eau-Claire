@@ -448,18 +448,18 @@ elif page == "💡  Learn & Tips":
     st.markdown('<p class="page-sub">Water facts, safety tips, which water to drink, and how to save water</p>', unsafe_allow_html=True)
 
     FACTS = [
-        ("3.4M",   "people die each year from water-related diseases making it one of the leading causes of death globally."),
-        ("1 in 3", "people globally do not have access to safe drinking water at home."),
-        ("80%",    "of diseases in developing countries are linked to unsafe water and poor sanitation."),
-        ("50L",    "per day is the minimum recommended by the UN for basic human needs: drinking, cooking, hygiene."),
-        ("There is about the same amount of water on Earth now as there was millions of years ago."),
-        ("Earth holds about 1.386 billion cubic kilometers of water."),
-        ("Of all the water on the planet, about 2.5 – 2.75 % is freshwater, and an even smaller fraction — around 0.3 % — is surface water in rivers and lakes that people use most directly."),
-        ("Only roughly 0.014 % of all water on Earth is both fresh and easily accessible in surface and near-surface sources that people can use directly."),
-        ("More than 68 % of freshwater is stored in ice sheets and glaciers, making these frozen reservoirs the planet’s largest freshwater pool."),
-        ("About 30 % of freshwater is stored as groundwater in aquifers below the surface."),
-        ("Antarctica and Greenland together hold the vast majority of the world’s ice-bound freshwater, but human-accessible fresh water is spread across glaciers, groundwater, lakes and rivers."),
-        ("oughly 2.1 % of all Earth’s water is frozen in glaciers and ice caps — a bigger share than older figures suggested."),
+        ("3.4M",       "people die each year from water-related diseases — one of the leading causes of death globally."),
+        ("1 in 3",     "people globally do not have access to safe drinking water at home."),
+        ("80%",        "of diseases in developing countries are linked to unsafe water and poor sanitation."),
+        ("50 L/day",   "is the minimum recommended by the UN for basic human needs: drinking, cooking, and hygiene."),
+        ("~Same",      "amount of water exists on Earth today as millions of years ago — water is constantly recycled."),
+        ("1.386B km³", "of water is held on Earth in total across all oceans, ice, rivers, and groundwater."),
+        ("2.5%",       "of all Earth's water is freshwater — only 0.3% of that is surface water in rivers and lakes."),
+        ("0.014%",     "of all water on Earth is both fresh and easily accessible for direct human use."),
+        ("68%",        "of all freshwater is locked in ice sheets and glaciers — the planet's largest freshwater store."),
+        ("30%",        "of freshwater is stored as groundwater in aquifers deep below the surface."),
+        ("Majority",   "of ice-bound freshwater is held by Antarctica and Greenland, with the rest in glaciers and rivers."),
+        ("2.1%",       "of all Earth's water is frozen in glaciers and ice caps — more than older estimates suggested."),
     ]
 
     # Random fact card
