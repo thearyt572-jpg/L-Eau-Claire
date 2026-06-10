@@ -1,66 +1,174 @@
-# 💧 AquaSense India — Water Quality App
+# 💧 L'Eau Claire — Water Quality Dashboard
 
-Two-page Streamlit app: interactive map + ML prediction.
+An interactive Streamlit web app for exploring, predicting, and reporting water quality across Indian states (2017–2022), built on CPCB data with an Extra Trees machine learning model.
 
 ---
 
 ## Folder Structure
 
-```
-water_app/
-├── app.py                         ← Single Streamlit app (both pages)
-├── dataset 2017-2022.csv          ← Raw data  ← YOU PROVIDE
-├── model/
-│   └── artifacts/
-│       ├── finalbest_model_tuned.pkl   ← from your ML notebook
-│       ├── finalfeature_cols.pkl       ← from your ML notebook
-│       ├── qt.pkl                      ← from your ML notebook
-│       └── state_freq_mapping.pkl      ← generate below
+```text
+mini_water_predict/
+├── app.py
 ├── requirements.txt
-└── README.md
+├── README.md
+├── dataset 2017-2022.csv
+├── data/
+│   └── reports.csv
+├── uploads/
+└── model/
+    └── artifacts/
+        ├── finalbest_model_tuned.pkl
+        ├── finalfeature_cols.pkl
+        ├── qt.pkl
+        └── state_freq_mapping.pkl
 ```
 
 ---
 
-## Step 1 — Save state frequency map (run once in your ML notebook)
-```python
-import joblib, os
-os.makedirs("model/artifacts", exist_ok=True)
+## Setup
 
-state_freq = df['State_Name'].value_counts(normalize=True).to_dict()
-joblib.dump(state_freq, 'model/artifacts/state_freq_mapping.pkl')
-print("Saved!")
-```
+### Install Dependencies
 
-## Step 2 — Copy your pkl files into model/artifacts/
-```
-finalbest_model_tuned.pkl  →  model/artifacts/finalbest_model_tuned.pkl
-finalfeature_cols.pkl      →  model/artifacts/finalfeature_cols.pkl
-qt.pkl                     →  model/artifacts/qt.pkl
-```
-
-## Step 3 — Install & run
 ```bash
 pip install -r requirements.txt
+```
+
+### Place Model Files
+
+Copy the following files into `model/artifacts/`:
+
+```text
+finalbest_model_tuned.pkl
+finalfeature_cols.pkl
+qt.pkl
+state_freq_mapping.pkl
+```
+
+### Generate State Frequency Mapping
+
+Run once before encoding `State Name`:
+
+```python
+import joblib
+import os
+
+os.makedirs("model/artifacts", exist_ok=True)
+
+state_freq = df["State Name"].value_counts(normalize=True).to_dict()
+joblib.dump(state_freq, "model/artifacts/state_freq_mapping.pkl")
+```
+
+### Run the Application
+
+```bash
 streamlit run app.py
 ```
 
-Open http://localhost:8501
+Open:
+
+```text
+http://localhost:8501
+```
 
 ---
 
 ## Pages
 
-| Page | What it does |
-|------|-------------|
-| 🗺️ Water Quality Map | Interactive map — colored dots per state/water body, filters by year & type |
-| 🔮 Predict Contamination | Enter 6 parameters + state + water body → predicted Fecal Coliform + safe/unsafe badge + confidence + feature importance + mini map |
+### 🗺️ Water Quality Map
+
+* Interactive India map
+* Color-coded contamination markers
+* Filter by year and water body type
+* Displays community pollution reports
+
+### 🔮 Predict Contamination
+
+* Predicts Fecal Coliform levels
+* Water safety classification
+* Confidence score visualization
+* Feature importance analysis
+
+### 💡 Learn & Tips
+
+* Water quality facts
+* Safe drinking water guidance
+* Water conservation recommendations
+* State-wise contamination insights
+
+### 🚨 Report Pollution
+
+* Submit pollution incidents
+* Optional photo upload
+* Stores reports locally
+* Reports appear on the map
+
+---
+
+## Model Details
+
+| Item             | Detail                      |
+| ---------------- | --------------------------- |
+| Algorithm        | Extra Trees Regressor       |
+| Target           | Fecal Coliform (MPN/100 mL) |
+| Target Transform | QuantileTransformer         |
+| CV Strategy      | 5-Fold Cross Validation     |
+| CV R²            | Approximately 0.30          |
+| Dataset          | CPCB India 2017–2022        |
+
+### Features
+
+```text
+Temperature
+DO_sqrt
+pH
+Conductivity_log
+BOD_log
+Nitrate_Nitrite_log
+BOD_Temp_log
+BOD_Conductivity_log
+Nitrate_Temp
+Is_Monsoon
+State_freq
+Water_Body_Type_POND
+Water_Body_Type_TANK
+Water_Body_Type_WETLAND
+```
 
 ---
 
 ## Safety Thresholds
 
-| Page | Threshold | Standard |
-|------|-----------|----------|
-| Map  | Safe ≤ 500 MPN/100ml | WHO / CPCB general |
-| Predict | Safe ≤ 50 MPN/100ml | CPCB Class A drinking water |
+| Module     | Threshold             |
+| ---------- | --------------------- |
+| Map        | Safe ≤ 500 MPN/100 mL |
+| Prediction | Safe ≤ 50 MPN/100 mL  |
+
+---
+
+## Tech Stack
+
+* Streamlit
+* Folium
+* streamlit-folium
+* scikit-learn
+* joblib
+* pandas
+* numpy
+* Pillow
+
+---
+
+## Data Source
+
+Central Pollution Control Board (CPCB), India
+
+Water quality monitoring data (2017–2022) including:
+
+* Temperature
+* Dissolved Oxygen (DO)
+* pH
+* Conductivity
+* Biological Oxygen Demand (BOD)
+* Nitrate/Nitrite
+* Fecal Coliform
+* Total Coliform

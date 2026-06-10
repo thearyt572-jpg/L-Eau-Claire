@@ -1,6 +1,13 @@
 venv/
+env/
+.venv/
+
 __pycache__/
 *.pyc
 *.pyo
+
 .ipynb_checkpoints/
+
 .env
+
+.streamlit/secrets.toml
