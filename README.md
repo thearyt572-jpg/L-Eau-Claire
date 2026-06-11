@@ -1,4 +1,4 @@
-# 💧 L'Eau Claire — Water Quality Dashboard
+# 💧 L'Eau Claire Water Quality Dashboard
 
 An interactive Streamlit web app for exploring, predicting, and reporting water quality across Indian states (2017–2022), built on CPCB data with an Extra Trees machine learning model.
 
