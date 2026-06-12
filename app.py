@@ -62,31 +62,31 @@ for folder in ["data", UPLOADS_DIR]:
     except Exception:
         pass
 
-# ══════════════════════════════════════════════════════════════════════════════
+#
 # GIF ASSETS
-# ══════════════════════════════════════════════════════════════════════════════
+# 
 GIF = {
-    "sidebar":        "https://media2.giphy.com/media/3oEjHI8WJv4x6UPFWU/giphy.gif",
-    "no_data":        "https://media1.giphy.com/media/xT9IgG50Lg7ruskt7e/giphy.gif",
-    "predict_idle":   "https://media0.giphy.com/media/l0HlNQ03J5JxX6lva/giphy.gif",
-    "water_cycle":    "https://upload.wikimedia.org/wikipedia/commons/thumb/4/45/Earth_Water_Cycle.gif/320px-Earth_Water_Cycle.gif",
-    "report_hero":    "https://media3.giphy.com/media/26xBwdIuRJiAIqHIA/giphy.gif",
-    "tip_boil":       "https://media0.giphy.com/media/3oriO6qJiXajN0TksU/giphy.gif",
-    "tip_test":       "https://media3.giphy.com/media/xUPGcjQ6dJEjH5uwMw/giphy.gif",
-    "tip_tank":       "https://media2.giphy.com/media/3oEjHLzm4BCF8zfPy0/giphy.gif",
-    "tip_check":      "https://media2.giphy.com/media/l4FGuhL4U2WyjdkaY/giphy.gif",
-    "tip_store":      "https://media0.giphy.com/media/3o7aD2saalBwwftBIY/giphy.gif",
-    "tip_tablet":     "https://media1.giphy.com/media/xT9IgA4gHzPsRMmtze/giphy.gif",
-    "tip_monsoon":    "https://media0.giphy.com/media/26BRv0ThflsHCqDrG/giphy.gif",
-    "tip_symptoms":   "https://media2.giphy.com/media/l41lGvinEgARjB2HC/giphy.gif",
-    "src_mountain":   "https://media2.giphy.com/media/3o7TKwxYkeW0ZvTqsU/giphy.gif",
-    "src_tap":        "https://media3.giphy.com/media/xT9IgzoKnwFNmISR8I/giphy.gif",
-    "src_ro":         "https://media1.giphy.com/media/3oEjI6SIIHBdRxXI40/giphy.gif",
-    "src_bottle":     "https://media0.giphy.com/media/3oEjHWpiVIOGXT5l9u/giphy.gif",
-    "src_river":      "https://media2.giphy.com/media/xT9IgG50Lg7ruskt7e/giphy.gif",
-    "src_pond":       "https://media3.giphy.com/media/26BRv0ThflsHCqDrG/giphy.gif",
-    "src_ground":     "https://media0.giphy.com/media/l0HlNQ03J5JxX6lva/giphy.gif",
-    "src_rain":       "https://media1.giphy.com/media/26xBwdIuRJiAIqHIA/giphy.gif",
+    "sidebar":        "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExeG91dXZnMXA3b2VkMzJ3enozeTUzMDV1dXRxdDd3b3dpZTY5NGVvNyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/y4nk5bgwpWL6T5Ax9y/giphy.gif",
+    "no_data":        "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExeG91dXZnMXA3b2VkMzJ3enozeTUzMDV1dXRxdDd3b3dpZTY5NGVvNyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/f54Or4wFysQ7vVGeKb/giphy.gif",
+    "predict_idle":   "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExeG91dXZnMXA3b2VkMzJ3enozeTUzMDV1dXRxdDd3b3dpZTY5NGVvNyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/vPzbDN4rBxuvtpSpzF/giphy.gif",
+    "water_cycle":    "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3MTMxN2JzdzZmdGYyZWU1djE3MWF2OWpvcHB3OHZxbzA5OW83dWszYSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/vFKqnCdLPNOKc/giphy.gif",
+    "report_hero":    "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3ZGxpNzIzMzRlMjA2b2Nya2phNHR2cDlvMm9icTM2MXRqd2pjMnJjZCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/MDJ9IbxxvDUQM/giphy.gif",
+    "tip_boil":       "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExeG91dXZnMXA3b2VkMzJ3enozeTUzMDV1dXRxdDd3b3dpZTY5NGVvNyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/MMquV2oInK40V86Q7g/giphy.gif",
+    "tip_test":       "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExeG91dXZnMXA3b2VkMzJ3enozeTUzMDV1dXRxdDd3b3dpZTY5NGVvNyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/TKa7fQzChHylCQ89to/giphy.gif",
+    "tip_tank":       "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3MTMxN2JzdzZmdGYyZWU1djE3MWF2OWpvcHB3OHZxbzA5OW83dWszYSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/S0Nokl7V0t4mfoYkLF/giphy.gif",
+    "tip_check":      "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3ZGxpNzIzMzRlMjA2b2Nya2phNHR2cDlvMm9icTM2MXRqd2pjMnJjZCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/UuzwffmvtBNGjYyEUe/giphy.gif",
+    "tip_store":      "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3ZGxpNzIzMzRlMjA2b2Nya2phNHR2cDlvMm9icTM2MXRqd2pjMnJjZCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/Cdkk6wFFqisTe/giphy.gif",
+    "tip_tablet":     "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3cHc5aGpwOWxyYmFqenpxdHZpejNtZWp5eTh3eTExMXpkZ2U4ZGlybiZlcD12MV9naWZzX3NlYXJjaCZjdD1n/G6TgcESZt8FFk8XV7K/giphy.gif",
+    "tip_monsoon":    "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3cHc5aGpwOWxyYmFqenpxdHZpejNtZWp5eTh3eTExMXpkZ2U4ZGlybiZlcD12MV9naWZzX3NlYXJjaCZjdD1n/tmulAo48zfdEzh85Wn/giphy.gif",
+    "tip_symptoms":   "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3cHc5aGpwOWxyYmFqenpxdHZpejNtZWp5eTh3eTExMXpkZ2U4ZGlybiZlcD12MV9naWZzX3NlYXJjaCZjdD1n/xun2qNfnK1cV5r07GM/giphy.gif",
+    "src_mountain":   "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3cHc5aGpwOWxyYmFqenpxdHZpejNtZWp5eTh3eTExMXpkZ2U4ZGlybiZlcD12MV9naWZzX3NlYXJjaCZjdD1n/3glRcNn8w5t9Ra98up/giphy.gif",
+    "src_tap":        "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3cWhqcTN1cTVtMDlpeWNiN3Jvd21uYm9qNGtwMXFnbWRmcjFodm8zcSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/aCSURh6OnUyXdOuYcq/giphy.gif",
+    "src_ro":         "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3cWhqcTN1cTVtMDlpeWNiN3Jvd21uYm9qNGtwMXFnbWRmcjFodm8zcSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/ufFCIpCX558dwvejkn/giphy.gif",
+    "src_bottle":     "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3YzNhYTRrNDUwYmI0bGhmMzY4cnUyaTR0NzFlM2RpemxlM2RpZmFqYiZlcD12MV9naWZzX3NlYXJjaCZjdD1n/BNlSrpW0e4nbgVZ2we/giphy.gif",
+    "src_river":      "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3bDFhOThkcWprY25zcXRjcGgyOXBvMzZranRrc2pvYnF2bm41YnJpZyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/yX8ykXlJByZVMUCVKw/giphy.gif",
+    "src_pond":       "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3bDFhOThkcWprY25zcXRjcGgyOXBvMzZranRrc2pvYnF2bm41YnJpZyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/nR4L10XlJcSeQ/giphy.gif",
+    "src_ground":     "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3bDFhOThkcWprY25zcXRjcGgyOXBvMzZranRrc2pvYnF2bm41YnJpZyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/gjsBu8ZUniOODwgPP5/giphy.gif",
+    "src_rain":       "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3ZGxpNzIzMzRlMjA2b2Nya2phNHR2cDlvMm9icTM2MXRqd2pjMnJjZCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/acgXBmnZjOS0lYImih/giphy.gif",
 }
 
 def gif(key, size=40):
