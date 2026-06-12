@@ -105,9 +105,8 @@ def get_safety_predict(fc):
     elif fc <= 500: return "Moderate risk",      "#d48f00", False
     else:           return "High risk — unsafe", "#c94040", False
 
-# ══════════════════════════════════════════════════════════════════════════════
 # DATA LOADERS
-# ══════════════════════════════════════════════════════════════════════════════
+
 @st.cache_data
 def load_data():
     # Search in current directory AND any immediate subdirectories
@@ -206,9 +205,9 @@ def get_session_reports_df():
         return pd.concat([base, pd.DataFrame(st.session_state.session_reports)], ignore_index=True)
     return base
 
-# ══════════════════════════════════════════════════════════════════════════════
+
 # GLOBAL STYLES
-# ══════════════════════════════════════════════════════════════════════════════
+
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap');
@@ -405,9 +404,9 @@ hr { border-color: var(--border-card) !important; }
 </style>
 """, unsafe_allow_html=True)
 
-# ══════════════════════════════════════════════════════════════════════════════
+
 # SIDEBAR
-# ══════════════════════════════════════════════════════════════════════════════
+
 with st.sidebar:
     st.markdown(
         f'<img src="{GIF["sidebar"]}" style="width:100%;border-radius:12px;margin-bottom:8px">',
@@ -417,10 +416,10 @@ with st.sidebar:
     st.caption("Water Quality Monitor · 2017–2022")
     st.divider()
     page = st.radio("Navigate", [
-        "🗺️  Water Quality Map",
-        "🔮  Predict Contamination",
-        "💡  Learn & Tips",
-        "🚨  Report Pollution",
+        "Water Quality Map",
+        "Predict Contamination",
+        "Learn & Tips",
+        "Report Pollution",
     ], label_visibility="collapsed")
     st.divider()
 
@@ -431,10 +430,10 @@ state_list = sorted(state_freq.keys()) if state_freq else sorted(STATE_COORDS.ke
 if "predict_bg" not in st.session_state:
     st.session_state.predict_bg = "default"
 
-# ══════════════════════════════════════════════════════════════════════════════
-# PAGE 1 — WATER QUALITY MAP
-# ══════════════════════════════════════════════════════════════════════════════
-if page == "🗺️  Water Quality Map":
+
+# PAGE 1: WATER QUALITY MAP
+
+if page == "Water Quality Map":
     st.session_state.predict_bg = "default"
     st.markdown('<p class="page-title">India Water Quality Map</p>', unsafe_allow_html=True)
     st.markdown('<p class="page-sub">Drinking water safety across Indian states · Fecal Coliform levels 2017–2022</p>', unsafe_allow_html=True)
@@ -465,7 +464,7 @@ if page == "🗺️  Water Quality Map":
             selected_wb, selected_year = "ALL", "ALL"
             st.info("Load dataset to enable filters.")
 
-    # ── If no dataset: show a small banner notice, then still render the map ──
+    # If no dataset: show a small banner notice, then still render the map
     if df is None:
         st.markdown(f"""
         <div class="nodata-banner">
@@ -480,7 +479,7 @@ if page == "🗺️  Water Quality Map":
           </div>
         </div>""", unsafe_allow_html=True)
 
-    # ── Build the map regardless of whether df exists ────────────────────────
+    #  Build the map regardless of whether df exists 
     m = folium.Map(location=[22.5, 82.0], zoom_start=5,
                    tiles="CartoDB positron", min_zoom=4, max_zoom=12)
     m.fit_bounds([[6.5, 68.0], [35.5, 97.5]])
@@ -488,7 +487,7 @@ if page == "🗺️  Water Quality Map":
     import hashlib
 
     if df is not None:
-        # ── Dataset available: show coloured dots per state + water body ─────
+        # Dataset available: show coloured dots per state + water body
         plot_df = df.copy()
         if selected_wb   != "ALL": plot_df = plot_df[plot_df["Type Water Body"] == selected_wb]
         if selected_year != "ALL": plot_df = plot_df[plot_df["Year"] == int(selected_year)]
@@ -534,7 +533,7 @@ if page == "🗺️  Water Quality Map":
                 ).add_to(m)
 
     else:
-        # ── No dataset: show a grey dot for every state ───────────────────────
+        # No dataset: show a grey dot for every state
         for state, (lat, lon) in STATE_COORDS.items():
             popup_html = f"""
             <div style="font-family:Arial,sans-serif;min-width:180px;padding:4px">
@@ -550,7 +549,7 @@ if page == "🗺️  Water Quality Map":
                 tooltip=folium.Tooltip(f"<b>{state.title()}</b> — No data", sticky=True),
             ).add_to(m)
 
-    # ── Overlay pollution reports on top of either map ────────────────────────
+    # Overlay pollution reports on top of either map 
     reports_df = get_session_reports_df()
     if not reports_df.empty:
         for _, r in reports_df.iterrows():
@@ -593,10 +592,10 @@ if page == "🗺️  Water Quality Map":
     st.caption("Source: CPCB India · Safe threshold: WHO & Indian Standards")
 
 
-# ══════════════════════════════════════════════════════════════════════════════
-# PAGE 2 — PREDICT CONTAMINATION
-# ══════════════════════════════════════════════════════════════════════════════
-elif page == "🔮  Predict Contamination":
+
+# PAGE 2: PREDICT CONTAMINATION
+
+elif page == "Predict Contamination":
     _bg = {"safe": "#0d2a1a", "mod": "#2a2000", "unsafe": "#2a0d0d", "default": "var(--bg-main)"}
     _bg_light = {"safe": "#d6f5e3", "mod": "#fff8e1", "unsafe": "#fde8e8", "default": "#ddeeff"}
     _key = st.session_state.predict_bg
@@ -747,23 +746,23 @@ elif page == "🔮  Predict Contamination":
     st.caption("Model: Extra Trees (tuned) · CPCB India 2017–2022")
 
 
-# ══════════════════════════════════════════════════════════════════════════════
-# PAGE 3 — LEARN & TIPS
-# ══════════════════════════════════════════════════════════════════════════════
-elif page == "💡  Learn & Tips":
+
+# PAGE 3: LEARN & TIPS
+
+elif page == "Learn & Tips":
     st.markdown('<p class="page-title">Learn & Tips</p>', unsafe_allow_html=True)
     st.markdown('<p class="page-sub">Water facts, safety tips, which water to drink, and how to save water</p>', unsafe_allow_html=True)
 
     FACTS = [
-        ("3.4M",       "people die each year from water-related diseases — one of the leading causes of death globally."),
+        ("3.4M",       "people die each year from water-related diseases, one of the leading causes of death globally."),
         ("1 in 3",     "people globally do not have access to safe drinking water at home."),
         ("80%",        "of diseases in developing countries are linked to unsafe water and poor sanitation."),
         ("50 L/day",   "is the minimum recommended by the UN for basic human needs: drinking, cooking, and hygiene."),
-        ("~Same",      "amount of water exists on Earth today as millions of years ago — water is constantly recycled."),
+        ("~Same",      "amount of water exists on Earth today as millions of years ago, water is constantly recycled."),
         ("1.386B km³", "of water is held on Earth in total across all oceans, ice, rivers, and groundwater."),
-        ("2.5%",       "of all Earth's water is freshwater — only 0.3% of that is surface water in rivers and lakes."),
+        ("2.5%",       "of all Earth's water is freshwater, only 0.3% of that is surface water in rivers and lakes."),
         ("0.014%",     "of all water on Earth is both fresh and easily accessible for direct human use."),
-        ("68%",        "of all freshwater is locked in ice sheets and glaciers — the planet's largest freshwater store."),
+        ("68%",        "of all freshwater is locked in ice sheets and glaciers - the planet's largest freshwater store."),
         ("30%",        "of freshwater is stored as groundwater in aquifers deep below the surface."),
         ("Majority",   "of ice-bound freshwater is held by Antarctica and Greenland, with the rest in glaciers."),
         ("2.1%",       "of all Earth's water is frozen in glaciers and ice caps."),
@@ -795,7 +794,7 @@ elif page == "💡  Learn & Tips":
             st.caption("Earth's water cycle")
         with col_txt:
             st.markdown("""
-            Water moves continuously through the environment — evaporating from oceans,
+            Water moves continuously through the environment - evaporating from oceans,
             falling as rain, filtering through rock, and flowing into rivers and lakes.
             Contamination at any stage affects drinking water quality.
             Fecal Coliform bacteria are the primary indicator of unsafe water
@@ -811,7 +810,7 @@ elif page == "💡  Learn & Tips":
             ("src_ro",       "Filtered / RO Water",   "Good",      "#3fa8c8",
              "RO removes dissolved solids, bacteria, and viruses. Reliable for daily use."),
             ("src_bottle",   "Bottled Water",         "Good",      "#7ecab8",
-             "Generally safe — check BIS certification (IS 14543). Avoid if seal is broken."),
+             "Generally safe - check BIS certification (IS 14543). Avoid if seal is broken."),
             ("src_river",    "River Water (untreated)","Dangerous","#c94040",
              "High risk of Fecal Coliform, BOD, and heavy metals. Never drink without treatment."),
             ("src_pond",     "Pond / Lake (untreated)","Dangerous","#c94040",
@@ -844,7 +843,7 @@ elif page == "💡  Learn & Tips":
             ("tip_tank",     "Clean Your Storage Tanks",
              "Water tanks breed bacteria. Clean and disinfect overhead tanks every 3–6 months."),
             ("tip_check",    "Check for Contamination Signs",
-             "Discolored water, unusual smell, or strange taste are red flags. Don't drink — report to local authorities."),
+             "Discolored water, unusual smell, or strange taste are red flags. Don't drink - report to local authorities."),
             ("tip_store",    "Proper Storage",
              "Store water in covered, food-grade containers. Avoid plastic containers exposed to sunlight."),
             ("tip_tablet",   "Use Purification Tablets",
@@ -901,16 +900,16 @@ elif page == "💡  Learn & Tips":
     st.caption("Sources: WHO, UNICEF, CPCB India, UN Water")
 
 
-# ══════════════════════════════════════════════════════════════════════════════
-# PAGE 4 — REPORT POLLUTION
-# ══════════════════════════════════════════════════════════════════════════════
-elif page == "🚨  Report Pollution":
+
+# PAGE 4: REPORT POLLUTION
+
+elif page == "Report Pollution":
     st.markdown(
         f'<img src="{GIF["report_hero"]}" style="width:100%;max-height:200px;object-fit:cover;border-radius:14px;margin-bottom:16px">',
         unsafe_allow_html=True,
     )
     st.markdown('<p class="page-title">Report Pollution</p>', unsafe_allow_html=True)
-    st.markdown('<p class="page-sub">Help your community — report polluted water bodies. Reports appear on the map.</p>', unsafe_allow_html=True)
+    st.markdown('<p class="page-sub">Help your community - report polluted water bodies. Reports appear on the map.</p>', unsafe_allow_html=True)
 
     is_read_only = not os.access(".", os.W_OK)
     if is_read_only:
