@@ -74,28 +74,28 @@ http://localhost:8501
 
 ## Pages
 
-### 🗺️ Water Quality Map
+### Water Quality Map
 
 * Interactive India map
 * Color-coded contamination markers
 * Filter by year and water body type
 * Displays community pollution reports
 
-### 🔮 Predict Contamination
+### Predict Contamination
 
 * Predicts Fecal Coliform levels
 * Water safety classification
 * Confidence score visualization
 * Feature importance analysis
 
-### 💡 Learn & Tips
+### Learn & Tips
 
 * Water quality facts
 * Safe drinking water guidance
 * Water conservation recommendations
 * State-wise contamination insights
 
-### 🚨 Report Pollution
+### Report Pollution
 
 * Submit pollution incidents
 * Optional photo upload
