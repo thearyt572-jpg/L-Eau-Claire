@@ -98,12 +98,12 @@ def gif(key, size=40):
 def get_safety_map(fc):
     if fc <= 500:    return "Safe to drink",            "green",  "Safe"
     elif fc <= 5000: return "Not safe to drink",        "orange", "Moderate"
-    else:            return "Dangerous — avoid contact", "red",   "Unsafe"
+    else:            return "Dangerous avoid contact", "red",   "Unsafe"
 
 def get_safety_predict(fc):
     if fc <= 50:    return "Safe (Class A)",     "#2e9e6e", True
     elif fc <= 500: return "Moderate risk",      "#d48f00", False
-    else:           return "High risk — unsafe", "#c94040", False
+    else:           return "High risk unsafe", "#c94040", False
 
 # DATA LOADERS
 
