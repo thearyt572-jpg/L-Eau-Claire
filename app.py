@@ -1,5 +1,5 @@
 """
-L'Eau Claire · 4-page Streamlit App
+L'Eau Claire · 5-page Streamlit App
 Run with: streamlit run app.py
 """
 
@@ -52,7 +52,7 @@ STATE_COORDS = {
     "WEST BENGAL"      : (22.9868,  87.8550),
 }
 
-ARTIFACTS_DIR = "model/artifacts"
+ARTIFACTS_DIR = "model"
 REPORTS_CSV   = "data/reports.csv"
 UPLOADS_DIR   = "uploads"
 
@@ -62,9 +62,9 @@ for folder in ["data", UPLOADS_DIR]:
     except Exception:
         pass
 
-#
+# ══════════════════════════════════════════════════════════════════════════════
 # GIF ASSETS
-# 
+# ══════════════════════════════════════════════════════════════════════════════
 GIF = {
     "sidebar":        "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExeG91dXZnMXA3b2VkMzJ3enozeTUzMDV1dXRxdDd3b3dpZTY5NGVvNyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/y4nk5bgwpWL6T5Ax9y/giphy.gif",
     "no_data":        "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExeG91dXZnMXA3b2VkMzJ3enozeTUzMDV1dXRxdDd3b3dpZTY5NGVvNyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/f54Or4wFysQ7vVGeKb/giphy.gif",
@@ -95,84 +95,75 @@ def gif(key, size=40):
 # ══════════════════════════════════════════════════════════════════════════════
 # SAFETY HELPERS
 # ══════════════════════════════════════════════════════════════════════════════
-def get_safety_map(fc):
-    if fc <= 500:    return "Safe to drink",            "green",  "Safe"
-    elif fc <= 5000: return "Not safe to drink",        "orange", "Moderate"
-    else:            return "Dangerous avoid contact", "red",   "Unsafe"
 
+# Map page uses loose display thresholds (<=500 safe, <=5000 moderate)
+# matching general Indian water quality categories.
+def get_safety_map(fc):
+    if fc <= 500:    return "Safe to drink",           "green",  "Safe"
+    elif fc <= 5000: return "Not safe to drink",       "orange", "Moderate"
+    else:            return "Dangerous avoid contact", "red",    "Unsafe"
+
+# Prediction page uses CPCB Class A threshold (<=50 = safe).
 def get_safety_predict(fc):
-    if fc <= 50:    return "Safe (Class A)",     "#2e9e6e", True
-    elif fc <= 500: return "Moderate risk",      "#d48f00", False
+    if fc <= 50:    return "Safe (Class A)",   "#2e9e6e", True
+    elif fc <= 500: return "Moderate risk",    "#d48f00", False
     else:           return "High risk unsafe", "#c94040", False
 
+# ══════════════════════════════════════════════════════════════════════════════
 # DATA LOADERS
-
+# ══════════════════════════════════════════════════════════════════════════════
 @st.cache_data
 def load_data():
-    # Search in current directory AND any immediate subdirectories
-    search_names = [
-        "dataset 2017-2022.csv",
-        "dataset 2017-2022 - Copy.csv",
-        "dataset.csv",
+    dataset_dir = "Dataset"
+    if not os.path.isdir(dataset_dir):
+        return None
+    candidates = [
+        os.path.join(dataset_dir, f)
+        for f in os.listdir(dataset_dir)
+        if f.endswith(".csv")
     ]
-    search_dirs = ["."] + [
-        d for d in os.listdir(".")
-        if os.path.isdir(d) and not d.startswith(".")
-    ]
-
-    candidates = []
-    for d in search_dirs:
-        for name in search_names:
-            candidates.append(os.path.join(d, name))
-    # Also accept any .csv in a "data" subfolder
-    if os.path.isdir("data"):
-        for f in os.listdir("data"):
-            if f.endswith(".csv") and "dataset" in f.lower():
-                candidates.append(os.path.join("data", f))
-
-    for path in candidates:
-        if os.path.exists(path):
-            try:
-                df = pd.read_csv(path)
-                for col in ["State Name", "Type Water Body"]:
-                    if col not in df.columns:
-                        continue
-                    df[col] = (df[col].astype(str)
-                               .str.replace(r"[\n\r]", " ", regex=True)
-                               .str.replace(r"\s+", " ", regex=True)
-                               .str.strip().str.upper())
-                raw_pairs = [
-                    ("Temperature",     "Min Temperature",           "Max Temperature"),
-                    ("DO",              "Min Dissolved Oxygen",      "Max Dissolved Oxygen"),
-                    ("pH",              "Min pH",                    "Max pH"),
-                    ("Conductivity",    "Min Conductivity",          "Max Conductivity"),
-                    ("BOD",             "Min BOD",                   "Max BOD"),
-                    ("Nitrate_Nitrite", "Min Nitrate N + Nitrite N", "Max Nitrate N + Nitrite N"),
-                    ("Fecal_Coliform",  "Min Fecal Coliform",        "Max Fecal Coliform"),
-                    ("Total_Coliform",  "Min Total Coliform",        "Max Total Coliform"),
-                ]
-                for avg_col, mn, mx in raw_pairs:
-                    for c in [mn, mx]:
-                        if c in df.columns:
-                            df[c] = pd.to_numeric(
-                                df[c].astype(str).str.replace(",", "", regex=False), errors="coerce")
-                    if mn in df.columns and mx in df.columns:
-                        df[avg_col] = (df[mn] + df[mx]) / 2
-                df = df.dropna(subset=["Fecal_Coliform", "State Name", "Type Water Body"])
-                df = df[df["Fecal_Coliform"] >= 0]
-                if len(df) > 0:
-                    return df
-            except Exception:
-                continue
+    for path in sorted(candidates):
+        try:
+            df = pd.read_csv(path)
+            for col in ["State Name", "Type Water Body"]:
+                if col not in df.columns:
+                    continue
+                df[col] = (df[col].astype(str)
+                           .str.replace(r"[\n\r]", " ", regex=True)
+                           .str.replace(r"\s+", " ", regex=True)
+                           .str.strip().str.upper())
+            raw_pairs = [
+                ("Temperature",     "Min Temperature",           "Max Temperature"),
+                ("DO",              "Min Dissolved Oxygen",      "Max Dissolved Oxygen"),
+                ("pH",              "Min pH",                    "Max pH"),
+                ("Conductivity",    "Min Conductivity",          "Max Conductivity"),
+                ("BOD",             "Min BOD",                   "Max BOD"),
+                ("Nitrate_Nitrite", "Min Nitrate N + Nitrite N", "Max Nitrate N + Nitrite N"),
+                ("Fecal_Coliform",  "Min Fecal Coliform",        "Max Fecal Coliform"),
+                ("Total_Coliform",  "Min Total Coliform",        "Max Total Coliform"),
+            ]
+            for avg_col, mn, mx in raw_pairs:
+                for c in [mn, mx]:
+                    if c in df.columns:
+                        df[c] = pd.to_numeric(
+                            df[c].astype(str).str.replace(",", "", regex=False), errors="coerce")
+                if mn in df.columns and mx in df.columns:
+                    df[avg_col] = (df[mn] + df[mx]) / 2
+            df = df.dropna(subset=["Fecal_Coliform", "State Name", "Type Water Body"])
+            df = df[df["Fecal_Coliform"] >= 0]
+            if len(df) > 0:
+                return df
+        except Exception:
+            continue
     return None
 
 @st.cache_resource
 def load_artifacts():
     base = ARTIFACTS_DIR
     try:
-        model        = joblib.load(f"{base}/finalbest_model_tuned.pkl")
-        feature_cols = joblib.load(f"{base}/finalfeature_cols.pkl")
-        qt           = joblib.load(f"{base}/qt.pkl")
+        model        = joblib.load(f"{base}/best_model_tuned.pkl")
+        feature_cols = joblib.load(f"{base}/feature_cols.pkl")
+        qt           = joblib.load(f"{base}/quantile_transformer.pkl")
         sf_path      = f"{base}/state_freq_mapping.pkl"
         state_freq   = joblib.load(sf_path) if os.path.exists(sf_path) else {}
         return model, feature_cols, qt, state_freq, None
@@ -205,9 +196,9 @@ def get_session_reports_df():
         return pd.concat([base, pd.DataFrame(st.session_state.session_reports)], ignore_index=True)
     return base
 
-
+# ══════════════════════════════════════════════════════════════════════════════
 # GLOBAL STYLES
-
+# ══════════════════════════════════════════════════════════════════════════════
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap');
@@ -286,7 +277,6 @@ hr { border-color: var(--border-card) !important; }
   font-size: 0.88rem; color: var(--text-muted);
   margin-top: 4px; margin-bottom: 1.2rem;
 }
-
 .fact-card {
   background: linear-gradient(135deg, var(--fact-bg-from), var(--fact-bg-to));
   border-radius: 16px; padding: 24px 28px;
@@ -299,7 +289,6 @@ hr { border-color: var(--border-card) !important; }
   color: var(--text-primary); line-height: 1;
 }
 .fact-text { font-size: 1.05rem; color: var(--accent-dark); margin-top: 8px; line-height: 1.5; }
-
 .tip-card {
   background: var(--bg-card); border-radius: 12px;
   padding: 16px 18px; border: 1.5px solid var(--border-card);
@@ -308,7 +297,6 @@ hr { border-color: var(--border-card) !important; }
 .tip-header { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
 .tip-title  { font-weight: 600; color: var(--text-primary); font-size: 1rem; }
 .tip-text   { font-size: 0.87rem; color: var(--text-secondary); line-height: 1.5; }
-
 .result-box {
   border-radius: 14px; padding: 24px 28px; margin-bottom: 14px;
   border: 1.5px solid transparent; box-shadow: 0 4px 20px var(--shadow);
@@ -327,7 +315,6 @@ hr { border-color: var(--border-card) !important; }
 }
 .result-unit  { font-size: 0.85rem; color: var(--text-light); margin-top: 4px; }
 .result-badge { font-size: 1.05rem; font-weight: 600; margin-top: 12px; }
-
 .conf-wrap { margin-bottom: 18px; }
 .conf-label-row {
   display: flex; justify-content: space-between;
@@ -335,7 +322,6 @@ hr { border-color: var(--border-card) !important; }
 }
 .conf-track { background: var(--conf-track); border-radius: 8px; height: 10px; overflow: hidden; }
 .conf-fill  { height: 100%; border-radius: 8px; background: linear-gradient(90deg, #7ecab8, var(--accent-blue)); }
-
 .summary-grid {
   display: grid; grid-template-columns: repeat(3, 1fr);
   gap: 10px; margin: 14px 0;
@@ -352,7 +338,6 @@ hr { border-color: var(--border-card) !important; }
   font-family: 'Playfair Display', serif;
   font-size: 1.3rem; font-weight: 600; color: var(--text-primary);
 }
-
 .empty-state {
   border: 2px dashed var(--border-card); border-radius: 14px;
   padding: 40px 24px; text-align: center;
@@ -364,29 +349,21 @@ hr { border-color: var(--border-card) !important; }
 }
 .empty-text { font-size: 1rem; font-weight: 500; color: var(--text-muted); }
 .empty-sub  { font-size: 0.8rem; margin-top: 8px; color: var(--text-light); }
-
 .nodata-banner {
-  background: var(--bg-card);
-  border: 1.5px solid var(--border-card);
-  border-left: 5px solid var(--accent-blue);
-  border-radius: 12px;
-  padding: 16px 20px;
-  margin-bottom: 16px;
-  display: flex;
-  align-items: center;
-  gap: 14px;
+  background: var(--bg-card); border: 1.5px solid var(--border-card);
+  border-left: 5px solid var(--accent-blue); border-radius: 12px;
+  padding: 16px 20px; margin-bottom: 16px;
+  display: flex; align-items: center; gap: 14px;
 }
 .nodata-banner img { width: 48px; height: 48px; border-radius: 8px; object-fit: cover; }
 .nodata-banner-text { flex: 1; }
 .nodata-banner-title { font-weight: 600; color: var(--text-primary); font-size: 1rem; margin-bottom: 4px; }
 .nodata-banner-sub   { font-size: 0.83rem; color: var(--text-muted); line-height: 1.5; }
 .nodata-code {
-  display: inline-block;
-  background: var(--bg-input); border: 1px solid var(--border-card);
+  display: inline-block; background: var(--bg-input); border: 1px solid var(--border-card);
   border-radius: 6px; padding: 2px 10px;
   font-family: monospace; font-size: 0.82rem; color: var(--accent-dark);
 }
-
 .src-row {
   display: flex; align-items: flex-start; gap: 14px;
   background: var(--bg-card); border-radius: 12px;
@@ -404,9 +381,9 @@ hr { border-color: var(--border-card) !important; }
 </style>
 """, unsafe_allow_html=True)
 
-
+# ══════════════════════════════════════════════════════════════════════════════
 # SIDEBAR
-
+# ══════════════════════════════════════════════════════════════════════════════
 with st.sidebar:
     st.markdown(
         f'<img src="{GIF["sidebar"]}" style="width:100%;border-radius:12px;margin-bottom:8px">',
@@ -418,6 +395,7 @@ with st.sidebar:
     page = st.radio("Navigate", [
         "Water Quality Map",
         "Predict Contamination",
+        "Forecast Comparison",
         "Learn & Tips",
         "Report Pollution",
     ], label_visibility="collapsed")
@@ -430,9 +408,9 @@ state_list = sorted(state_freq.keys()) if state_freq else sorted(STATE_COORDS.ke
 if "predict_bg" not in st.session_state:
     st.session_state.predict_bg = "default"
 
-
+# ══════════════════════════════════════════════════════════════════════════════
 # PAGE 1: WATER QUALITY MAP
-
+# ══════════════════════════════════════════════════════════════════════════════
 if page == "Water Quality Map":
     st.session_state.predict_bg = "default"
     st.markdown('<p class="page-title">India Water Quality Map</p>', unsafe_allow_html=True)
@@ -464,7 +442,6 @@ if page == "Water Quality Map":
             selected_wb, selected_year = "ALL", "ALL"
             st.info("Load dataset to enable filters.")
 
-    # If no dataset: show a small banner notice, then still render the map
     if df is None:
         st.markdown(f"""
         <div class="nodata-banner">
@@ -472,14 +449,12 @@ if page == "Water Quality Map":
           <div class="nodata-banner-text">
             <div class="nodata-banner-title">Dataset not found — showing all states (no data)</div>
             <div class="nodata-banner-sub">
-              Place <span class="nodata-code">dataset 2017-2022.csv</span> in the same folder as
-              <span class="nodata-code">app.py</span> and restart to see real water quality data.
+              Place CSV files inside the <span class="nodata-code">Dataset/</span> folder and restart.
               The map below shows all Indian states as grey markers until data is loaded.
             </div>
           </div>
         </div>""", unsafe_allow_html=True)
 
-    #  Build the map regardless of whether df exists 
     m = folium.Map(location=[22.5, 82.0], zoom_start=5,
                    tiles="CartoDB positron", min_zoom=4, max_zoom=12)
     m.fit_bounds([[6.5, 68.0], [35.5, 97.5]])
@@ -487,7 +462,6 @@ if page == "Water Quality Map":
     import hashlib
 
     if df is not None:
-        # Dataset available: show coloured dots per state + water body
         plot_df = df.copy()
         if selected_wb   != "ALL": plot_df = plot_df[plot_df["Type Water Body"] == selected_wb]
         if selected_year != "ALL": plot_df = plot_df[plot_df["Year"] == int(selected_year)]
@@ -524,23 +498,20 @@ if page == "Water Quality Map":
                     tooltip=folium.Tooltip(f"<b>{state.title()}</b> — {wb.title()}<br>{label}", sticky=True),
                 ).add_to(m)
         else:
-            # Filters produced no rows — still show all states in grey
             for state, (lat, lon) in STATE_COORDS.items():
                 folium.CircleMarker(
                     location=[lat, lon], radius=10, color="white", weight=1.5,
                     fill=True, fill_color="gray", fill_opacity=0.5,
                     tooltip=folium.Tooltip(f"<b>{state.title()}</b><br>No data for selected filters", sticky=True),
                 ).add_to(m)
-
     else:
-        # No dataset: show a grey dot for every state
         for state, (lat, lon) in STATE_COORDS.items():
             popup_html = f"""
             <div style="font-family:Arial,sans-serif;min-width:180px;padding:4px">
               <b style="font-size:15px">📍 {state.title()}</b>
               <hr style="margin:4px 0">
               <div style="font-size:13px;color:#888">No data loaded yet.<br>
-              Add the dataset CSV to see water quality levels.</div>
+              Add CSV files to the Dataset/ folder.</div>
             </div>"""
             folium.CircleMarker(
                 location=[lat, lon], radius=10, color="white", weight=1.5,
@@ -549,7 +520,6 @@ if page == "Water Quality Map":
                 tooltip=folium.Tooltip(f"<b>{state.title()}</b> — No data", sticky=True),
             ).add_to(m)
 
-    # Overlay pollution reports on top of either map 
     reports_df = get_session_reports_df()
     if not reports_df.empty:
         for _, r in reports_df.iterrows():
@@ -591,12 +561,11 @@ if page == "Water Quality Map":
 
     st.caption("Source: CPCB India · Safe threshold: WHO & Indian Standards")
 
-
-
+# ══════════════════════════════════════════════════════════════════════════════
 # PAGE 2: PREDICT CONTAMINATION
-
+# ══════════════════════════════════════════════════════════════════════════════
 elif page == "Predict Contamination":
-    _bg = {"safe": "#0d2a1a", "mod": "#2a2000", "unsafe": "#2a0d0d", "default": "var(--bg-main)"}
+    _bg       = {"safe": "#0d2a1a", "mod": "#2a2000", "unsafe": "#2a0d0d", "default": "var(--bg-main)"}
     _bg_light = {"safe": "#d6f5e3", "mod": "#fff8e1", "unsafe": "#fde8e8", "default": "#ddeeff"}
     _key = st.session_state.predict_bg
     st.markdown(f"""
@@ -620,11 +589,11 @@ elif page == "Predict Contamination":
     </style>""", unsafe_allow_html=True)
 
     st.markdown('<p class="page-title">Predict Fecal Coliform</p>', unsafe_allow_html=True)
-    st.markdown('<p class="page-sub">Enter water parameters · Extra Trees model (tuned) · Threshold: 50 MPN/100 mL (CPCB Class A)</p>', unsafe_allow_html=True)
+    st.markdown('<p class="page-sub">Enter water parameters · XGBoost model (tuned) · Threshold: 50 MPN/100 mL (CPCB Class A)</p>', unsafe_allow_html=True)
 
     with st.sidebar:
         st.header("Model Info")
-        st.metric("Algorithm",  "Extra Trees")
+        st.metric("Algorithm",  "XGBoost")
         st.metric("CV R²",      "~0.30")
         st.metric("Safe limit", "50 MPN/100mL")
         if load_err:
@@ -636,13 +605,13 @@ elif page == "Predict Contamination":
         st.markdown("#### Water Parameters")
         c1, c2 = st.columns(2)
         with c1:
-            temp    = st.number_input("Temperature (°C)",      0.0,  45.0,  28.0, 0.5)
-            ph      = st.number_input("pH",                    0.0,  14.0,   7.2, 0.1)
-            bod     = st.number_input("BOD (mg/L)",            0.0, 300.0,   3.0, 0.1)
+            temp    = st.number_input("Temperature (°C)",       0.0,  45.0,  28.0, 0.5)
+            ph      = st.number_input("pH",                     0.0,  14.0,   7.2, 0.1)
+            bod     = st.number_input("BOD (mg/L)",             0.0, 300.0,   3.0, 0.1)
         with c2:
-            do      = st.number_input("Dissolved O₂ (mg/L)",  0.0,  20.0,   6.5, 0.1)
-            cond    = st.number_input("Conductivity (µS/cm)",  0.0, 50000.0, 420.0, 10.0)
-            nitrate = st.number_input("Nitrate/Nitrite (mg/L)",0.0, 100.0,   1.2, 0.1)
+            do      = st.number_input("Dissolved O₂ (mg/L)",   0.0,  20.0,   6.5, 0.1)
+            cond    = st.number_input("Conductivity (µS/cm)",   0.0, 50000.0, 420.0, 10.0)
+            nitrate = st.number_input("Nitrate/Nitrite (mg/L)", 0.0, 100.0,   1.2, 0.1)
         wbt         = st.selectbox("Water Body Type", ["LAKE", "POND", "TANK", "WETLAND"])
         predict_btn = st.button("Predict Fecal Coliform", type="primary", use_container_width=True)
 
@@ -651,9 +620,12 @@ elif page == "Predict Contamination":
         result_area = st.empty()
 
         if predict_btn:
-            if model is None:
+            if model is None or qt is None:
                 with result_area.container():
-                    st.error("Model artifacts not found. Check sidebar.")
+                    missing = []
+                    if model is None: missing.append("model (best_model_tuned.pkl)")
+                    if qt is None:    missing.append("quantile transformer (quantile_transformer.pkl)")
+                    st.error(f"Artifacts not loaded: {', '.join(missing)}. Check sidebar for details.")
             else:
                 try:
                     do_sqrt          = np.sqrt(max(do, 0))
@@ -680,8 +652,15 @@ elif page == "Predict Contamination":
                     X_in   = X_in[feature_cols]
                     y_qt   = model.predict(X_in)
                     y_pred = float(qt.inverse_transform(y_qt.reshape(-1, 1)).ravel().clip(0)[0])
-                    tree_preds = np.array([t.predict(X_in)[0] for t in model.estimators_])
-                    confidence = float(max(0, min(100, 100 - np.std(tree_preds) * 40)))
+
+                    # Confidence — tree ensembles only; XGBoost does not expose .estimators_
+                    confidence = None
+                    try:
+                        tree_preds = np.array([t.predict(X_in)[0] for t in model.estimators_])
+                        confidence = float(max(0, min(100, 100 - np.std(tree_preds) * 40)))
+                    except AttributeError:
+                        pass
+
                     label, color, is_safe = get_safety_predict(y_pred)
                     box_cls = "result-safe" if is_safe else ("result-mod" if y_pred <= 500 else "result-unsafe")
                     st.session_state.predict_bg = "safe" if is_safe else ("mod" if y_pred <= 500 else "unsafe")
@@ -707,15 +686,18 @@ elif page == "Predict Contamination":
                           <div class="result-unit">MPN / 100 mL</div>
                           <div class="result-badge">{label}</div>
                         </div>""", unsafe_allow_html=True)
-                        st.markdown(f"""
-                        <div class="conf-wrap">
-                          <div class="conf-label-row">
-                            <span>Model Confidence</span><span><b>{confidence:.0f}%</b></span>
-                          </div>
-                          <div class="conf-track">
-                            <div class="conf-fill" style="width:{confidence}%"></div>
-                          </div>
-                        </div>""", unsafe_allow_html=True)
+                        if confidence is not None:
+                            st.markdown(f"""
+                            <div class="conf-wrap">
+                              <div class="conf-label-row">
+                                <span>Model Confidence</span><span><b>{confidence:.0f}%</b></span>
+                              </div>
+                              <div class="conf-track">
+                                <div class="conf-fill" style="width:{confidence}%"></div>
+                              </div>
+                            </div>""", unsafe_allow_html=True)
+                        else:
+                            st.caption("Confidence interval not available for XGBoost.")
                         st.markdown(f'<div class="summary-grid">{chips_html}</div>', unsafe_allow_html=True)
                         st.markdown("---")
                         st.markdown("**Top feature importances**")
@@ -743,12 +725,139 @@ elif page == "Predict Contamination":
                     yearly.columns = ["Year", "Median FC"]
                     st.line_chart(yearly.set_index("Year"), height=200)
 
-    st.caption("Model: Extra Trees (tuned) · CPCB India 2017–2022")
+    st.caption("Model: XGBoost (tuned) · CPCB India 2017–2022")
 
+# ══════════════════════════════════════════════════════════════════════════════
+# PAGE 3: FORECAST COMPARISON
+# ══════════════════════════════════════════════════════════════════════════════
+elif page == "Forecast Comparison":
+    st.markdown('<p class="page-title">Predicted vs Real — Year by Year</p>', unsafe_allow_html=True)
+    st.markdown('<p class="page-sub">Compare model predictions against real Fecal Coliform readings, 2018–2023 · 2023 has no ground truth yet</p>', unsafe_allow_html=True)
 
+    FORECAST_CSV = "data/forecast_all_years.csv"
+    if not os.path.exists(FORECAST_CSV):
+        st.error(f"Forecast file not found at {FORECAST_CSV}. Place forecast_all_years.csv in the data/ folder.")
+    else:
+        forecast_full = pd.read_csv(FORECAST_CSV)
 
-# PAGE 3: LEARN & TIPS
+        agg = forecast_full.groupby(["State_Name", "Year"]).agg(
+            Predicted_FC=("Predicted_FC", "first"),
+            Real_FC=("Real_FC", "median"),
+            n_stations=("Real_FC", "count"),
+        ).reset_index()
+        agg["Safety"] = agg["Predicted_FC"].apply(lambda x: get_safety_map(x)[2])
 
+        with st.sidebar:
+            st.header("Comparison Filters")
+            year_opts = sorted(agg["Year"].unique().tolist())
+            selected_year = st.selectbox(
+                "Year", year_opts,
+                index=year_opts.index(2023) if 2023 in year_opts else len(year_opts) - 1,
+                key="forecast_year_select",
+            )
+
+        year_df  = agg[agg["Year"] == selected_year].copy()
+        has_real = year_df["Real_FC"].notna().any()
+
+        col1, col2, col3 = st.columns(3)
+        col1.metric("Safe States",     int((year_df["Safety"] == "Safe").sum()))
+        col2.metric("Not Safe States", int((year_df["Safety"] != "Safe").sum()))
+        if has_real:
+            mae_year = (year_df["Predicted_FC"] - year_df["Real_FC"]).abs().mean()
+            col3.metric(f"{selected_year} Avg Error (MAE)", f"{mae_year:,.0f}")
+        else:
+            col3.metric(f"{selected_year} Avg Error (MAE)", "N/A — forecast only")
+
+        if not has_real:
+            st.info(f"{selected_year} is a pure forecast year — no real-world readings exist yet to compare against.")
+
+        st.divider()
+
+        st.subheader("Prediction Error Trend, All Years")
+        trend = agg.dropna(subset=["Real_FC"]).groupby("Year").apply(
+            lambda g: pd.Series({"MAE": (g["Predicted_FC"] - g["Real_FC"]).abs().mean()})
+        ).reset_index()
+        st.line_chart(trend.set_index("Year"), height=240)
+        st.caption("Mean absolute error between predicted and real Fecal Coliform, by year. "
+                   "2023 excluded — no real data exists for it yet.")
+
+        st.divider()
+
+        st.subheader(f"Map — {selected_year}")
+        m_forecast = folium.Map(location=[22.5, 82.0], zoom_start=5,
+                                tiles="CartoDB positron", min_zoom=4, max_zoom=12)
+        m_forecast.fit_bounds([[6.5, 68.0], [35.5, 97.5]])
+
+        for _, row in year_df.iterrows():
+            state = row["State_Name"]
+            if state not in STATE_COORDS:
+                continue
+            lat, lon = STATE_COORDS[state]
+            label, color, status = get_safety_map(row["Predicted_FC"])
+            bg = {"green": "#d4edda", "orange": "#fff3cd", "red": "#f8d7da"}[color]
+            real_line = (f"<tr><td><b>Real FC (median)</b></td><td>{row['Real_FC']:,.0f}</td></tr>"
+                         if pd.notna(row["Real_FC"]) else
+                         "<tr><td colspan='2'><i>No real data yet</i></td></tr>")
+            popup_html = f"""
+            <div style="font-family:Arial,sans-serif;min-width:200px;padding:4px">
+              <b style="font-size:15px">📍 {state.title()}</b>
+              <hr style="margin:4px 0">
+              <table style="width:100%;font-size:13px">
+                <tr><td><b>Predicted FC</b></td><td>{row['Predicted_FC']:,.0f} MPN/100ml</td></tr>
+                {real_line}
+              </table>
+              <div style="margin-top:8px;padding:6px;border-radius:6px;
+                background:{bg};font-weight:bold;font-size:13px;text-align:center">{label}</div>
+            </div>"""
+            folium.CircleMarker(
+                location=[lat, lon], radius=12, color="white", weight=1.5,
+                fill=True, fill_color=color, fill_opacity=0.85,
+                popup=folium.Popup(popup_html, max_width=260),
+                tooltip=folium.Tooltip(f"<b>{state.title()}</b><br>{selected_year} — {label}", sticky=True),
+            ).add_to(m_forecast)
+
+        st_folium(m_forecast, width="100%", height=520, returned_objects=[])
+
+        st.divider()
+
+        if has_real:
+            st.subheader(f"Predicted vs Real — {selected_year}")
+            compare_df = year_df.dropna(subset=["Real_FC"])[["State_Name", "Predicted_FC", "Real_FC"]].copy()
+            compare_df["State_Name"] = compare_df["State_Name"].str.title()
+            compare_df = compare_df.sort_values("Real_FC", ascending=False).set_index("State_Name")
+            st.bar_chart(compare_df, height=320)
+        else:
+            st.subheader(f"Predicted Levels — {selected_year}")
+            chart_df = year_df[["State_Name", "Predicted_FC"]].copy()
+            chart_df["State_Name"] = chart_df["State_Name"].str.title()
+            chart_df = chart_df.sort_values("Predicted_FC", ascending=False).set_index("State_Name")
+            st.bar_chart(chart_df, height=320)
+
+        st.divider()
+
+        st.subheader("Largest Misses" if has_real else "Highest Predicted States")
+        worst = year_df.copy()
+        if has_real:
+            worst["Abs_Error"] = (worst["Predicted_FC"] - worst["Real_FC"]).abs()
+            worst = worst.sort_values("Abs_Error", ascending=False).head(10)
+            worst["State_Name"] = worst["State_Name"].str.title()
+            show = worst[["State_Name", "Predicted_FC", "Real_FC", "Abs_Error", "Safety"]].rename(columns={
+                "State_Name": "State", "Predicted_FC": "Predicted FC",
+                "Real_FC": "Real FC (median)", "Abs_Error": "Abs Error",
+            })
+        else:
+            worst = worst.sort_values("Predicted_FC", ascending=False).head(10)
+            worst["State_Name"] = worst["State_Name"].str.title()
+            show = worst[["State_Name", "Predicted_FC", "Safety"]].rename(columns={
+                "State_Name": "State", "Predicted_FC": "Predicted FC",
+            })
+        st.dataframe(show, use_container_width=True, hide_index=True)
+
+    st.caption("Source: forecast_all_years.csv · Real_FC aggregated as per-state median across monitoring stations.")
+
+# ══════════════════════════════════════════════════════════════════════════════
+# PAGE 4: LEARN & TIPS
+# ══════════════════════════════════════════════════════════════════════════════
 elif page == "Learn & Tips":
     st.markdown('<p class="page-title">Learn & Tips</p>', unsafe_allow_html=True)
     st.markdown('<p class="page-sub">Water facts, safety tips, which water to drink, and how to save water</p>', unsafe_allow_html=True)
@@ -803,21 +912,21 @@ elif page == "Learn & Tips":
         st.markdown("---")
 
         water_types = [
-            ("src_mountain", "Mountain Spring Water", "Excellent", "#2e9e6e",
+            ("src_mountain", "Mountain Spring Water",  "Excellent", "#2e9e6e",
              "Naturally filtered through rock. Very low contamination risk. Best choice if available."),
-            ("src_tap",      "Municipal Tap Water",   "Good",      "#3fa8c8",
+            ("src_tap",      "Municipal Tap Water",    "Good",      "#3fa8c8",
              "Treated and chlorinated. Safe in most Indian cities. Always boil if unsure."),
-            ("src_ro",       "Filtered / RO Water",   "Good",      "#3fa8c8",
+            ("src_ro",       "Filtered / RO Water",    "Good",      "#3fa8c8",
              "RO removes dissolved solids, bacteria, and viruses. Reliable for daily use."),
-            ("src_bottle",   "Bottled Water",         "Good",      "#7ecab8",
+            ("src_bottle",   "Bottled Water",          "Good",      "#7ecab8",
              "Generally safe - check BIS certification (IS 14543). Avoid if seal is broken."),
-            ("src_river",    "River Water (untreated)","Dangerous","#c94040",
+            ("src_river",    "River Water (untreated)", "Dangerous", "#c94040",
              "High risk of Fecal Coliform, BOD, and heavy metals. Never drink without treatment."),
-            ("src_pond",     "Pond / Lake (untreated)","Dangerous","#c94040",
+            ("src_pond",     "Pond / Lake (untreated)", "Dangerous", "#c94040",
              "Stagnant water breeds bacteria. Fecal Coliform often exceeds 5,000 MPN/100ml."),
-            ("src_ground",   "Groundwater / Borewells","Moderate", "#d48f00",
+            ("src_ground",   "Groundwater / Borewells", "Moderate",  "#d48f00",
              "Risk of arsenic, fluoride, and nitrate contamination. Always test before drinking."),
-            ("src_rain",     "Rainwater (harvested)", "Moderate",  "#d48f00",
+            ("src_rain",     "Rainwater (harvested)",   "Moderate",  "#d48f00",
              "Clean at source but contaminated by rooftops. Filter and disinfect before use."),
         ]
         for gif_key, name, safety, color, desc in water_types:
@@ -869,11 +978,11 @@ elif page == "Learn & Tips":
         st.markdown("### Water Conservation Tips")
         st.markdown("#### At Home")
         home_tips = [
-            ("tip_monsoon",  "Shorter Showers",     "Cutting shower time by 2 minutes saves ~30 litres per shower."),
-            ("tip_check",    "Fix Leaks Fast",       "A dripping tap wastes up to 20,000 litres per year."),
-            ("src_rain",     "Water Plants Wisely",  "Water early morning or evening to reduce evaporation by 50%."),
-            ("tip_tank",     "Full Loads Only",      "Run washing machines only when full — saves 30–50 litres per cycle."),
-            ("tip_boil",     "Dual-Flush Toilets",   "Switching to dual-flush saves up to 67% of toilet water usage."),
+            ("tip_monsoon", "Shorter Showers",    "Cutting shower time by 2 minutes saves ~30 litres per shower."),
+            ("tip_check",   "Fix Leaks Fast",      "A dripping tap wastes up to 20,000 litres per year."),
+            ("src_rain",    "Water Plants Wisely", "Water early morning or evening to reduce evaporation by 50%."),
+            ("tip_tank",    "Full Loads Only",     "Run washing machines only when full — saves 30–50 litres per cycle."),
+            ("tip_boil",    "Dual-Flush Toilets",  "Switching to dual-flush saves up to 67% of toilet water usage."),
         ]
         for gif_key, title, text in home_tips:
             st.markdown(f"""
@@ -899,10 +1008,9 @@ elif page == "Learn & Tips":
 
     st.caption("Sources: WHO, UNICEF, CPCB India, UN Water")
 
-
-
-# PAGE 4: REPORT POLLUTION
-
+# ══════════════════════════════════════════════════════════════════════════════
+# PAGE 5: REPORT POLLUTION
+# ══════════════════════════════════════════════════════════════════════════════
 elif page == "Report Pollution":
     st.markdown(
         f'<img src="{GIF["report_hero"]}" style="width:100%;max-height:200px;object-fit:cover;border-radius:14px;margin-bottom:16px">',
