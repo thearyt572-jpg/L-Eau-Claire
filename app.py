@@ -1,5 +1,5 @@
 """
-L'Eau Claire · 5-page Streamlit App
+commL'Eau Claire · 5-page Streamlit App
 Run with: streamlit run app.py
 """
 
@@ -14,14 +14,11 @@ warnings.filterwarnings("ignore")
 
 st.set_page_config(
     page_title="L'Eau Claire · Water Quality Monitor",
-    page_icon="💧",
     layout="wide",
     initial_sidebar_state="expanded",
 )
 
-# ══════════════════════════════════════════════════════════════════════════════
 # CONSTANTS
-# ══════════════════════════════════════════════════════════════════════════════
 STATE_COORDS = {
     "ANDHRA PRADESH"   : (15.9129,  79.7400),
     "ASSAM"            : (26.2006,  92.9376),
@@ -52,8 +49,8 @@ STATE_COORDS = {
     "WEST BENGAL"      : (22.9868,  87.8550),
 }
 
-ARTIFACTS_DIR = "model"
-REPORTS_CSV   = "data/reports.csv"
+ARTIFACTS_DIR = r"D:\mini_water_predict\model\artifacts"
+REPORTS_CSV   = r"D:\mini_water_predict\data\reports.csv"
 UPLOADS_DIR   = "uploads"
 
 for folder in ["data", UPLOADS_DIR]:
@@ -66,35 +63,34 @@ for folder in ["data", UPLOADS_DIR]:
 # GIF ASSETS
 # ══════════════════════════════════════════════════════════════════════════════
 GIF = {
-    "sidebar":        "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExeG91dXZnMXA3b2VkMzJ3enozeTUzMDV1dXRxdDd3b3dpZTY5NGVvNyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/y4nk5bgwpWL6T5Ax9y/giphy.gif",
-    "no_data":        "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExeG91dXZnMXA3b2VkMzJ3enozeTUzMDV1dXRxdDd3b3dpZTY5NGVvNyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/f54Or4wFysQ7vVGeKb/giphy.gif",
-    "predict_idle":   "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExeG91dXZnMXA3b2VkMzJ3enozeTUzMDV1dXRxdDd3b3dpZTY5NGVvNyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/vPzbDN4rBxuvtpSpzF/giphy.gif",
-    "water_cycle":    "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3MTMxN2JzdzZmdGYyZWU1djE3MWF2OWpvcHB3OHZxbzA5OW83dWszYSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/vFKqnCdLPNOKc/giphy.gif",
-    "report_hero":    "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3ZGxpNzIzMzRlMjA2b2Nya2phNHR2cDlvMm9icTM2MXRqd2pjMnJjZCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/MDJ9IbxxvDUQM/giphy.gif",
-    "tip_boil":       "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExeG91dXZnMXA3b2VkMzJ3enozeTUzMDV1dXRxdDd3b3dpZTY5NGVvNyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/MMquV2oInK40V86Q7g/giphy.gif",
-    "tip_test":       "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExeG91dXZnMXA3b2VkMzJ3enozeTUzMDV1dXRxdDd3b3dpZTY5NGVvNyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/TKa7fQzChHylCQ89to/giphy.gif",
-    "tip_tank":       "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3MTMxN2JzdzZmdGYyZWU1djE3MWF2OWpvcHB3OHZxbzA5OW83dWszYSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/S0Nokl7V0t4mfoYkLF/giphy.gif",
-    "tip_check":      "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3ZGxpNzIzMzRlMjA2b2Nya2phNHR2cDlvMm9icTM2MXRqd2pjMnJjZCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/UuzwffmvtBNGjYyEUe/giphy.gif",
-    "tip_store":      "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3ZGxpNzIzMzRlMjA2b2Nya2phNHR2cDlvMm9icTM2MXRqd2pjMnJjZCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/Cdkk6wFFqisTe/giphy.gif",
-    "tip_tablet":     "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3cHc5aGpwOWxyYmFqenpxdHZpejNtZWp5eTh3eTExMXpkZ2U4ZGlybiZlcD12MV9naWZzX3NlYXJjaCZjdD1n/G6TgcESZt8FFk8XV7K/giphy.gif",
-    "tip_monsoon":    "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3cHc5aGpwOWxyYmFqenpxdHZpejNtZWp5eTh3eTExMXpkZ2U4ZGlybiZlcD12MV9naWZzX3NlYXJjaCZjdD1n/tmulAo48zfdEzh85Wn/giphy.gif",
-    "tip_symptoms":   "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3cHc5aGpwOWxyYmFqenpxdHZpejNtZWp5eTh3eTExMXpkZ2U4ZGlybiZlcD12MV9naWZzX3NlYXJjaCZjdD1n/xun2qNfnK1cV5r07GM/giphy.gif",
-    "src_mountain":   "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3cHc5aGpwOWxyYmFqenpxdHZpejNtZWp5eTh3eTExMXpkZ2U4ZGlybiZlcD12MV9naWZzX3NlYXJjaCZjdD1n/3glRcNn8w5t9Ra98up/giphy.gif",
-    "src_tap":        "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3cWhqcTN1cTVtMDlpeWNiN3Jvd21uYm9qNGtwMXFnbWRmcjFodm8zcSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/aCSURh6OnUyXdOuYcq/giphy.gif",
-    "src_ro":         "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3cWhqcTN1cTVtMDlpeWNiN3Jvd21uYm9qNGtwMXFnbWRmcjFodm8zcSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/ufFCIpCX558dwvejkn/giphy.gif",
-    "src_bottle":     "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3YzNhYTRrNDUwYmI0bGhmMzY4cnUyaTR0NzFlM2RpemxlM2RpZmFqYiZlcD12MV9naWZzX3NlYXJjaCZjdD1n/BNlSrpW0e4nbgVZ2we/giphy.gif",
-    "src_river":      "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3bDFhOThkcWprY25zcXRjcGgyOXBvMzZranRrc2pvYnF2bm41YnJpZyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/yX8ykXlJByZVMUCVKw/giphy.gif",
-    "src_pond":       "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3bDFhOThkcWprY25zcXRjcGgyOXBvMzZranRrc2pvYnF2bm41YnJpZyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/nR4L10XlJcSeQ/giphy.gif",
-    "src_ground":     "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3bDFhOThkcWprY25zcXRjcGgyOXBvMzZranRrc2pvYnF2bm41YnJpZyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/gjsBu8ZUniOODwgPP5/giphy.gif",
-    "src_rain":       "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3ZGxpNzIzMzRlMjA2b2Nya2phNHR2cDlvMm9icTM2MXRqd2pjMnJjZCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/acgXBmnZjOS0lYImih/giphy.gif",
+    "sidebar":        "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExdzBraHpoZ3RmNmdiemhtem43aTR2M2VoMzNqbmE5Ym5xNTJmdGNvayZlcD12MV9naWZzX3NlYXJjaCZjdD1n/Sbsf1Zsamps1zgZyZj/giphy.gif",
+    "no_data":        "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExdzBraHpoZ3RmNmdiemhtem43aTR2M2VoMzNqbmE5Ym5xNTJmdGNvayZlcD12MV9naWZzX3NlYXJjaCZjdD1n/m5KDfLMRIS2CwCXVKG/giphy.gif",
+    "predict_idle":   "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExdzBraHpoZ3RmNmdiemhtem43aTR2M2VoMzNqbmE5Ym5xNTJmdGNvayZlcD12MV9naWZzX3NlYXJjaCZjdD1n/IKFZJeAA5A8OOumLHx/giphy.gif",
+    "water_cycle":    "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExdzBraHpoZ3RmNmdiemhtem43aTR2M2VoMzNqbmE5Ym5xNTJmdGNvayZlcD12MV9naWZzX3NlYXJjaCZjdD1n/7mSgaTrLetqpOdnZ9q/giphy.gif",
+    "report_hero":    "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3cXhvajhzd3NkeGtpM2x4NHZ1ZGJ4NTF2d3EwbmRsczZtOGxicDFrdCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/bgOQ2Mx4uLnsoyyIg9/giphy.gif",
+    "tip_boil":       "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExbW43OXRpaHg0bDYwMWNsdzY4eDAxeHZ5b2ZzYWhrbnhlN3YwYXZobiZlcD12MV9naWZzX3NlYXJjaCZjdD1n/vnNHyroyEwb4s/giphy.gif",
+    "tip_test":       "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3bnM3MWQzcG0zb3hpNHVnYXNleWxzdGJkZ3h2M2ZlNnMzNmhjM3l2dyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/OalJFGFBD4D2xn61qb/giphy.gif",
+    "tip_tank":       "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3YW1hb2c1dTNqODl0a3lpdXNxOHZ3OHR5cmV0cjA0OXB2NjE3bWgzMyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/5bCYrRAZ3b5HtQ5HuJ/giphy.gif",
+    "tip_check":      "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3ZW45bmV6N2VuN3J1ZzlsNGlqdzYyNzJiYTd1MHQ0MGd2Y3gxeGN0NCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/gLWZMy6cpK4Cca2MpA/giphy.gif",
+    "tip_store":      "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3aGlnZHhkOTV3aHVibmZjamYzb2RvZjVpcDZpMDNkMWZrczhzeWd2cyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/4uKGppPmeVBCzwfnMK/giphy.gif",
+    "tip_tablet":     "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3NWxkdTdpZjBlNXBoNWtqYmkydGZqc3ZlZmNyYTVmcTYxMTJrcjVkZiZlcD12MV9naWZzX3NlYXJjaCZjdD1n/VehoU0h2Rl8Gc/giphy.gif",
+    "tip_monsoon":    "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3aGlnZHhkOTV3aHVibmZjamYzb2RvZjVpcDZpMDNkMWZrczhzeWd2cyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/Q2koSsz3l42ZIiboyW/giphy.gif",
+    "tip_symptoms":   "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3dmN4b3pwZnhzcmppZTF3ZDE1OHhvbTM1NGx1NHA3bHV3bnZhcTJ5NiZlcD12MV9naWZzX3NlYXJjaCZjdD1n/LI6TgnchmtJ60/giphy.gif",
+    "src_mountain":   "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3eW10OTVjOGFtYjBzMWpqdmkycmkyZjc2ZGpucHQ3anVueDNpZnJkZiZlcD12MV9naWZzX3NlYXJjaCZjdD1n/bc7Ae3mL7ZAEo/giphy.gif",
+    "src_tap":        "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3azNiZ2V5bTAyMTA1bGpvczJlanB3OGQ0OTNycjZveGZoaTIyZXY2YiZlcD12MV9naWZzX3NlYXJjaCZjdD1n/fVYhJVclr91E4/giphy.gif",
+    "src_ro":         "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3azNiZ2V5bTAyMTA1bGpvczJlanB3OGQ0OTNycjZveGZoaTIyZXY2YiZlcD12MV9naWZzX3NlYXJjaCZjdD1n/Z4oPJW36axa32zBA6C/giphy.gif",
+    "src_bottle":     "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3dmN4b3pwZnhzcmppZTF3ZDE1OHhvbTM1NGx1NHA3bHV3bnZhcTJ5NiZlcD12MV9naWZzX3NlYXJjaCZjdD1n/TJpp166ImcK1a/giphy.gif",
+    "src_river":      "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3azNiZ2V5bTAyMTA1bGpvczJlanB3OGQ0OTNycjZveGZoaTIyZXY2YiZlcD12MV9naWZzX3NlYXJjaCZjdD1n/VQ5vmfZWGnXqCH5vul/giphy.gif",
+    "src_pond":       "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3YXZ6ZTR1YTlkbHpwaHVnajM1eDBtaGRvcGtyNm9tYXBjdTMzeDB4NyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/SFQiIj7DXwl3ypIV5B/giphy.gif",
+    "src_ground":     "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3N2hjMWllanRkcW9wOGN2MW56eGh2Y2xjdnJiNDV6dTRqcGJ5ZjZsdSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/9TKBUr2RwHLd8ehAjg/giphy.gif",
+    "src_rain":       "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3ZW45bmV6N2VuN3J1ZzlsNGlqdzYyNzJiYTd1MHQ0MGd2Y3gxeGN0NCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/G0Odfjd78JTpu/giphy.gif",
 }
 
 def gif(key, size=40):
     return f'<img src="{GIF[key]}" style="width:{size}px;height:{size}px;object-fit:cover;border-radius:6px;vertical-align:middle">'
 
-# ══════════════════════════════════════════════════════════════════════════════
+
 # SAFETY HELPERS
-# ══════════════════════════════════════════════════════════════════════════════
 
 # Map page uses loose display thresholds (<=500 safe, <=5000 moderate)
 # matching general Indian water quality categories.
@@ -114,7 +110,7 @@ def get_safety_predict(fc):
 # ══════════════════════════════════════════════════════════════════════════════
 @st.cache_data
 def load_data():
-    dataset_dir = "Dataset"
+    dataset_dir = "d:\mini_water_predict\Dataset"
     if not os.path.isdir(dataset_dir):
         return None
     candidates = [
@@ -160,13 +156,17 @@ def load_data():
 @st.cache_resource
 def load_artifacts():
     base = ARTIFACTS_DIR
+
     try:
-        model        = joblib.load(f"{base}/best_model_tuned.pkl")
-        feature_cols = joblib.load(f"{base}/feature_cols.pkl")
-        qt           = joblib.load(f"{base}/quantile_transformer.pkl")
-        sf_path      = f"{base}/state_freq_mapping.pkl"
-        state_freq   = joblib.load(sf_path) if os.path.exists(sf_path) else {}
+        model = joblib.load(os.path.join(base, "best_model.pkl"))
+        feature_cols = joblib.load(os.path.join(base, "feature_cols.pkl"))
+        qt = joblib.load(os.path.join(base, "quantile_transformer.pkl"))
+
+        sf_path = os.path.join(base, "state_freq_mapping.pkl")
+        state_freq = joblib.load(sf_path) if os.path.exists(sf_path) else {}
+
         return model, feature_cols, qt, state_freq, None
+
     except Exception as e:
         return None, None, None, {}, str(e)
 
@@ -589,12 +589,12 @@ elif page == "Predict Contamination":
     </style>""", unsafe_allow_html=True)
 
     st.markdown('<p class="page-title">Predict Fecal Coliform</p>', unsafe_allow_html=True)
-    st.markdown('<p class="page-sub">Enter water parameters · XGBoost model (tuned) · Threshold: 50 MPN/100 mL (CPCB Class A)</p>', unsafe_allow_html=True)
+    st.markdown('<p class="page-sub">Enter water parameters · XGBoost model · Threshold: 50 MPN/100 mL (CPCB Class A)</p>', unsafe_allow_html=True)
 
     with st.sidebar:
         st.header("Model Info")
-        st.metric("Algorithm",  "XGBoost")
-        st.metric("CV R²",      "~0.30")
+        st.metric("Algorithm",  "Extra Trees")
+        st.metric("CV R²",      "~0.3")
         st.metric("Safe limit", "50 MPN/100mL")
         if load_err:
             st.error(f"Model not loaded:\n{load_err}")
@@ -623,7 +623,7 @@ elif page == "Predict Contamination":
             if model is None or qt is None:
                 with result_area.container():
                     missing = []
-                    if model is None: missing.append("model (best_model_tuned.pkl)")
+                    if model is None: missing.append("model (best_model.pkl)")
                     if qt is None:    missing.append("quantile transformer (quantile_transformer.pkl)")
                     st.error(f"Artifacts not loaded: {', '.join(missing)}. Check sidebar for details.")
             else:
@@ -653,7 +653,7 @@ elif page == "Predict Contamination":
                     y_qt   = model.predict(X_in)
                     y_pred = float(qt.inverse_transform(y_qt.reshape(-1, 1)).ravel().clip(0)[0])
 
-                    # Confidence — tree ensembles only; XGBoost does not expose .estimators_
+                    # Confidence tree ensembles only; XGBoost does not expose .estimators_
                     confidence = None
                     try:
                         tree_preds = np.array([t.predict(X_in)[0] for t in model.estimators_])
@@ -725,16 +725,16 @@ elif page == "Predict Contamination":
                     yearly.columns = ["Year", "Median FC"]
                     st.line_chart(yearly.set_index("Year"), height=200)
 
-    st.caption("Model: XGBoost (tuned) · CPCB India 2017–2022")
+    st.caption("Model: XGBoost · CPCB India 2017–2022")
 
 # ══════════════════════════════════════════════════════════════════════════════
 # PAGE 3: FORECAST COMPARISON
 # ══════════════════════════════════════════════════════════════════════════════
 elif page == "Forecast Comparison":
-    st.markdown('<p class="page-title">Predicted vs Real — Year by Year</p>', unsafe_allow_html=True)
+    st.markdown('<p class="page-title">Predicted vs Real Year by Year</p>', unsafe_allow_html=True)
     st.markdown('<p class="page-sub">Compare model predictions against real Fecal Coliform readings, 2018–2023 · 2023 has no ground truth yet</p>', unsafe_allow_html=True)
 
-    FORECAST_CSV = "data/forecast_all_years.csv"
+    FORECAST_CSV = "Dataset/forecast_all_years.csv"
     if not os.path.exists(FORECAST_CSV):
         st.error(f"Forecast file not found at {FORECAST_CSV}. Place forecast_all_years.csv in the data/ folder.")
     else:
@@ -763,13 +763,25 @@ elif page == "Forecast Comparison":
         col1.metric("Safe States",     int((year_df["Safety"] == "Safe").sum()))
         col2.metric("Not Safe States", int((year_df["Safety"] != "Safe").sum()))
         if has_real:
-            mae_year = (year_df["Predicted_FC"] - year_df["Real_FC"]).abs().mean()
-            col3.metric(f"{selected_year} Avg Error (MAE)", f"{mae_year:,.0f}")
+            mae_year = (
+                year_df["Predicted_FC"] - year_df["Real_FC"]
+            ).abs().mean()
+
+            col3.metric(
+                f"{selected_year} Avg Error (MAE)",
+                f"{mae_year:,.0f}"
+            )
         else:
-            col3.metric(f"{selected_year} Avg Error (MAE)", "N/A — forecast only")
+            col3.metric(
+                f"{selected_year} Avg Error (MAE)",
+                "N/A forecast only"
+            )
 
         if not has_real:
-            st.info(f"{selected_year} is a pure forecast year — no real-world readings exist yet to compare against.")
+            st.info(
+                f"{selected_year} is a pure forecast year, "
+            "no real world readings exist yet to compare against."
+            )
 
         st.divider()
 
@@ -779,11 +791,11 @@ elif page == "Forecast Comparison":
         ).reset_index()
         st.line_chart(trend.set_index("Year"), height=240)
         st.caption("Mean absolute error between predicted and real Fecal Coliform, by year. "
-                   "2023 excluded — no real data exists for it yet.")
+                   "2023 excluded no real data exists for it yet.")
 
         st.divider()
 
-        st.subheader(f"Map — {selected_year}")
+        st.subheader(f"Map {selected_year}")
         m_forecast = folium.Map(location=[22.5, 82.0], zoom_start=5,
                                 tiles="CartoDB positron", min_zoom=4, max_zoom=12)
         m_forecast.fit_bounds([[6.5, 68.0], [35.5, 97.5]])
