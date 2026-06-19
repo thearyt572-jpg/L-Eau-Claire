@@ -3,20 +3,53 @@ commL'Eau Claire · 5-page Streamlit App
 Run with: streamlit run app.py
 """
 
+import os
+import joblib
+import gdown
 import streamlit as st
+
+# Add these missing imports to fix the undefined variable errors:
 import pandas as pd
 import numpy as np
 import folium
 from streamlit_folium import st_folium
-import joblib, os, warnings, random, datetime
+import random
+from datetime import datetime
 from PIL import Image
-warnings.filterwarnings("ignore")
 
-st.set_page_config(
-    page_title="L'Eau Claire · Water Quality Monitor",
-    layout="wide",
-    initial_sidebar_state="expanded",
-)
+# === CONFIG ===
+DRIVE_URL = "https://drive.google.com/drive/folders/11ueQ6B1vR2pNTkkn5FDdzmiqGTtkzstr?usp=sharing"
+MODEL_DIR = "model/artifacts"
+MODEL_PATH = os.path.join(MODEL_DIR, "best_model.pkl")
+
+
+@st.cache_resource
+def load_model():
+
+    # create folder if not exists
+    os.makedirs(MODEL_DIR, exist_ok=True)
+
+    # if model not downloaded yet → download folder
+    if not os.path.exists(MODEL_PATH):
+
+        st.info("Downloading model from Google Drive...")
+
+        gdown.download_folder(
+            url=DRIVE_URL,
+            output=MODEL_DIR,
+            quiet=False,
+            use_cookies=False
+        )
+
+        st.success("Model downloaded successfully!")
+
+    # load model
+    model = joblib.load(MODEL_PATH)
+
+    return model
+
+
+model = load_model()
 
 # CONSTANTS
 STATE_COORDS = {
