@@ -480,7 +480,7 @@ if page == "Water Quality Map":
         <div class="nodata-banner">
           <img src="{GIF['no_data']}" alt="water">
           <div class="nodata-banner-text">
-            <div class="nodata-banner-title">Dataset not found — showing all states (no data)</div>
+            <div class="nodata-banner-title">Dataset not found showing all states (no data)</div>
             <div class="nodata-banner-sub">
               Place CSV files inside the <span class="nodata-code">Dataset/</span> folder and restart.
               The map below shows all Indian states as grey markers until data is loaded.
@@ -541,7 +541,7 @@ if page == "Water Quality Map":
         for state, (lat, lon) in STATE_COORDS.items():
             popup_html = f"""
             <div style="font-family:Arial,sans-serif;min-width:180px;padding:4px">
-              <b style="font-size:15px">📍 {state.title()}</b>
+              <b style="font-size:15px"> {state.title()}</b>
               <hr style="margin:4px 0">
               <div style="font-size:13px;color:#888">No data loaded yet.<br>
               Add CSV files to the Dataset/ folder.</div>
@@ -592,7 +592,7 @@ if page == "Water Quality Map":
             display = display.sort_values("Fecal Coliform (MPN/100ml)", ascending=False).reset_index(drop=True)
             st.dataframe(display, use_container_width=True, hide_index=True)
 
-    st.caption("Source: CPCB India · Safe threshold: WHO & Indian Standards")
+    st.caption("Source & Safe threshold: CPCB India & Indian Standards")
 
 # ══════════════════════════════════════════════════════════════════════════════
 # PAGE 2: PREDICT CONTAMINATION
@@ -622,7 +622,7 @@ elif page == "Predict Contamination":
     </style>""", unsafe_allow_html=True)
 
     st.markdown('<p class="page-title">Predict Fecal Coliform</p>', unsafe_allow_html=True)
-    st.markdown('<p class="page-sub">Enter water parameters · XGBoost model · Threshold: 50 MPN/100 mL (CPCB Class A)</p>', unsafe_allow_html=True)
+    st.markdown('<p class="page-sub">Enter water parameters · Extra Tree model · Threshold: 50 MPN/100 mL (CPCB Class A)</p>', unsafe_allow_html=True)
 
     with st.sidebar:
         st.header("Model Info")
